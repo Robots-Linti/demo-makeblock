@@ -98,6 +98,11 @@ double angle_deg = 180.0/PI;
 void setRotation(double speed);
 void setSpeed(double speed);
 void rotateLeft(double degrees);
+void avanzar(double tiempo, double rapidez);
+void abrirPinza();
+void cerrarPinza();
+void girar(double tiempo, double sentido);
+MeMegaPiDCMotor motor_4(4);
 MeGyro gyro_1;
 MeUltrasonicSensor ultrasonic_7(7);
 double turningSpeed;
@@ -114,7 +119,15 @@ void setup(){
 /* INICIALIZACIÓN VARIABLES NUESTRAS */
     Serial.begin(9600);
     attachInterrupt(Encoder_1.getIntNum(), isr_process_encoder1, RISING);
+    Encoder_1.setPulse(8);
+    Encoder_1.setRatio(46.67);
+    Encoder_1.setPosPid(1.8,0,1.2);
+    Encoder_1.setSpeedPid(0.18,0,0);
     attachInterrupt(Encoder_2.getIntNum(), isr_process_encoder2, RISING);
+    Encoder_2.setPulse(8);
+    Encoder_2.setRatio(46.67);
+    Encoder_2.setPosPid(1.8,0,1.2);
+    Encoder_2.setSpeedPid(0.18,0,0);
     gyro_1.begin();
     turningSpeed = 50;
     normalSpeed = 255;
@@ -151,6 +164,41 @@ void rotateLeft(double degrees)
     }
     setSpeed(0);
 }
+
+void avanzar(double tiempo, double rapidez)
+{
+    Encoder_1.runSpeed((-1) * (rapidez));
+    Encoder_2.runSpeed(rapidez);
+    _delay(tiempo);
+    Encoder_1.runSpeed(0);
+    Encoder_2.runSpeed(0);
+}
+
+void abrirPinza()
+{
+    motor_4.run(-255);
+    _delay(2);
+    motor_4.run(0);
+    _delay(0.1);
+}
+
+void cerrarPinza()
+{
+    motor_4.run(255);
+    _delay(2);
+    motor_4.run(0);
+    _delay(0.1);
+}
+
+void girar(double tiempo, double sentido)
+{
+    Encoder_1.runSpeed(sentido);
+    Encoder_2.runSpeed(sentido);
+    _delay(tiempo);
+    Encoder_1.runSpeed(0);
+    Encoder_2.runSpeed(0);
+}
+
 
 int leerOpcion() {
 /* la lectura de la elección se realiza mediante el sensor de distancia;
@@ -194,25 +242,46 @@ void programa2() {
     setSpeed(0);
     _delay(1);
   }
-  Serial.println("termino ejecucion");
 }
 
 void recorridoPoligono(){
 /* cantidad de lados del polígono = distancia al sensor ultrasónico a la que
 se pone la mano dividido 10cm */
-    int lectura = 400;
-    int lados;
-    while (lectura > 55) {
-      lectura = ultrasonic_7.distanceCm();
+  int lectura = 400;
+  int lados;
+
+  Serial.println("elija la cantidad de lados del polígono");
+  _delay(1);
+  while (lectura > 55) {
+    lectura = ultrasonic_7.distanceCm();
+  }
+  lados = lectura / 10;
+  Serial.print("polígono de ");
+  Serial.print(lados);
+  Serial.println(" lados");
+  setSpeed(normalSpeed);
+  _delay(1);
+  setSpeed(0);
+  _delay(1);
+  rotateLeft(((360) / (lados)) * (0.8333));
+  _delay(1);
+  _loop();
+}
+
+void agarraGiraYSuelta() {
+  int obj = 0;
+  abrirPinza();
+  for(int __i__=0;__i__<2;++__i__) {
+    avanzar(2,255);
+    if(((fmod(obj,2))==(1))){
+      abrirPinza();
+    } else {
+      cerrarPinza();
     }
-    lados = lectura / 10;
-    setSpeed(normalSpeed);
-    _delay(1);
-    setSpeed(0);
-    _delay(1);
-    rotateLeft(((360) / (lados)) * (0.8333));
-    _delay(1);
-    _loop();
+    obj += 1;
+    avanzar(2,-255);
+    girar(0.69,100);
+  }
 }
 /* FIN FUNCIONES NUESTRAS */
 
@@ -232,8 +301,11 @@ void loop(){
       Serial.println("entro a programa 3: recorrido poligono");
       recorridoPoligono();
       break;
+    case 4:
+      Serial.println("entro a programa 4: agarra, gira y suelta");
+      agarraGiraYSuelta();
+      break;
     default:
-      // do something
       break;
   }
   Serial.println("fin del switch case");
