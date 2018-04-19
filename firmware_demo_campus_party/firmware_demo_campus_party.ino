@@ -102,7 +102,7 @@ void avanzar(double tiempo, double rapidez);
 void abrirPinza();
 void cerrarPinza();
 void girar(double tiempo, double sentido);
-MeMegaPiDCMotor motor_4(4);
+MeMegaPiDCMotor motor_12(12);
 MeGyro gyro_1;
 MeUltrasonicSensor ultrasonic_7(7);
 double turningSpeed;
@@ -176,17 +176,17 @@ void avanzar(double tiempo, double rapidez)
 
 void abrirPinza()
 {
-    motor_4.run(-255);
+    motor_12.run(-255);
     _delay(2);
-    motor_4.run(0);
+    motor_12.run(0);
     _delay(0.1);
 }
 
 void cerrarPinza()
 {
-    motor_4.run(255);
+    motor_12.run(255);
     _delay(2);
-    motor_4.run(0);
+    motor_12.run(0);
     _delay(0.1);
 }
 
@@ -206,11 +206,11 @@ int selector() {
     lecturaAnterior = lectura;
     _delay(1);
     lectura = ultrasonic_7.distanceCm();
+    Serial.print("lectura = ");
+    Serial.print(lectura);
+    Serial.print("\tlecturaAnterior = ");
+    Serial.println(lecturaAnterior);
   } while ((fabs(lectura-lecturaAnterior) > 5) || (lectura >= 400));
-  Serial.print("lectura = ");
-  Serial.print(lectura);
-  Serial.print("\tlecturaAnterior = ");
-  Serial.println(lecturaAnterior);
   return lectura;
 }
 
