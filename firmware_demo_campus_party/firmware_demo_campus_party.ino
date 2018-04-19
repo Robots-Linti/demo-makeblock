@@ -199,6 +199,20 @@ void girar(double tiempo, double sentido)
     Encoder_2.runSpeed(0);
 }
 
+int selector() {
+  int lectura = 400;
+  int lecturaAnterior;
+  do {
+    lecturaAnterior = lectura;
+    _delay(1);
+    lectura = ultrasonic_7.distanceCm();
+  } while ((fabs(lectura-lecturaAnterior) > 5) || (lectura >= 400));
+  Serial.print("lectura = ");
+  Serial.print(lectura);
+  Serial.print("\tlecturaAnterior = ");
+  Serial.println(lecturaAnterior);
+  return lectura;
+}
 
 int leerOpcion() {
 /* la lectura de la elección se realiza mediante el sensor de distancia;
@@ -206,7 +220,7 @@ apoyando la mano a cierta distancia (en intervalos de 10cm) se elige una opción
     int eligio = false;
     int lectura;
     while (!eligio) {
-      lectura = ultrasonic_7.distanceCm();
+      lectura = selector();
       if (lectura < 40) {
         eligio = true;
         if (lectura < 30) {
@@ -248,16 +262,16 @@ void programa2() {
 }
 
 void recorridoPoligono(){
-/* cantidad de lados del polígono = (distancia al sensor ultrasónico a la que
-se pone la mano) / 10cm + 2 */
   int lectura = 400;
   int lados;
 
   Serial.println("elija la cantidad de lados del polígono");
   _delay(1);
   while (lectura > 55) {
-    lectura = ultrasonic_7.distanceCm();
+    lectura = selector();
   }
+  /* cantidad de lados del polígono = (distancia al sensor ultrasónico a la que
+  se pone la mano) / 10cm + 2 */
   lados = lectura / 10 + 2;
   Serial.print("polígono de ");
   Serial.print(lados);
