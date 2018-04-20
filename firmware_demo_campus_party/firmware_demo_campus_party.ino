@@ -128,6 +128,11 @@ void setup(){
     Encoder_2.setRatio(46.67);
     Encoder_2.setPosPid(1.8,0,1.2);
     Encoder_2.setSpeedPid(0.18,0,0);
+    attachInterrupt(Encoder_3.getIntNum(), isr_process_encoder3, RISING);
+    Encoder_3.setPulse(8);
+    Encoder_3.setRatio(46.67);
+    Encoder_3.setPosPid(1.8,0,1.2);
+    Encoder_3.setSpeedPid(0.18,0,0);
     gyro_1.begin();
     turningSpeed = 255;      // turningSpeed = 100;
     normalSpeed = 255;
@@ -172,6 +177,12 @@ void avanzar(double tiempo, double rapidez)
     _delay(tiempo);
     Encoder_1.runSpeed(0);
     Encoder_2.runSpeed(0);
+}
+
+void moverBrazo(double speed)
+{
+    Encoder_3.setTarPWM(speed);
+    _delay(2);
 }
 
 void abrirPinza()
@@ -289,14 +300,15 @@ void recorridoPoligono(){
 
 void agarraGiraYSuelta() {
   int obj = 0;
-  abrirPinza();
   for(int __i__=0;__i__<2;++__i__) {
     avanzar(2,normalSpeed);
+    moverBrazo(normalSpeed);
     if(((fmod(obj,2))==(1))){
       abrirPinza();
     } else {
       cerrarPinza();
     }
+    moverBrazo(normalSpeed);
     obj += 1;
     avanzar(2,-normalSpeed);
     girar(0.69,turningSpeed);
@@ -306,6 +318,12 @@ void agarraGiraYSuelta() {
 
 void loop(){
 /* PROGRAMA NUESTRO */
+
+//    Encoder_3.setTarPWM(255);
+//    _delay(1);
+//    Encoder_3.setTarPWM(-255);
+//    _delay(1);
+
   Serial.println("inicio loop ppal");
   switch (leerOpcion()) {
     case 1:
