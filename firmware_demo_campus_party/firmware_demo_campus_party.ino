@@ -100,6 +100,8 @@ void rotateLeft(double degrees);
 void avanzar(double tiempo, double rapidez);
 void abrirPinza();
 void cerrarPinza();
+void subirBrazo();
+void bajarBrazo();
 void girar(double tiempo, double sentido);
 /* FIN PROTOTIPOS DE FUNCIONES NUESTRAS */
 
@@ -151,12 +153,6 @@ void avanzar(int tiempo, double rapidez)
 	Encoder_2.runSpeed(0);
 }
 
-void moverBrazo(double speed)
-{
-	Encoder_3.setTarPWM(speed);
-	_delay(2);
-}
-
 void abrirPinza()
 {
 	motor_12.run(-255);
@@ -171,6 +167,20 @@ void cerrarPinza()
 	_delay(2);
 	motor_12.run(0);
 	_delay(0.1);
+}
+
+void subirBrazo()
+{
+	Encoder_3.setTarPWM(-100);
+	_delay(7);
+	Encoder_3.setTarPWM(0);
+}
+
+void bajarBrazo()
+{
+	Encoder_3.setTarPWM(100);
+	_delay(4);
+	Encoder_3.setTarPWM(0);
 }
 
 void girar(double tiempo, double sentido)
@@ -272,17 +282,26 @@ void recorridoPoligono(int lados) {
 }
 
 void agarraGiraYSuelta() {
-	char obj = 0;
+	/* Llevar brazo a posición inicial y abrir pinza */
+	{
+		motor_12.run(-255);
+		Encoder_3.setTarPWM(-100);
+		_delay(2);
+		motor_12.run(0);
+		_delay(5);
+		Encoder_3.setTarPWM(0);
+	}
+
 	for (char i = 0; i < 2; i++) {
-		avanzar(2,normalSpeed);
-		moverBrazo(normalSpeed);
-		if (obj++ % 2 == 1)
+		avanzar(2, normalSpeed);
+		bajarBrazo();
+		if (i % 2)
 			abrirPinza();
 		else
 			cerrarPinza();
-		moverBrazo(normalSpeed);
+		subirBrazo();
 		avanzar(2,-normalSpeed);
-		girar(0.69,turningSpeed);
+		girar(0.69, turningSpeed);
 	}
 }
 
@@ -301,26 +320,18 @@ void reset()
 /* FIN FUNCIONES NUESTRAS */
 
 void loop() {
+	agarraGiraYSuelta();
+	goto fin;
+
 	/* PROGRAMA NUESTRO */
 	for (char i = 1; i <= 4; i++) {
 		switch (i) {
 		case 1:
-			Serial.println("Programa 1: robot que se para cuando tiene algo adelante");
+			Serial.println("Robot que se para cuando tiene algo adelante");
 			robotQueSeParaCuandoTieneAlgoAdelante();
 			break;
 		case 2:
-			Serial.println("Programa 2: giro un poquito las ruedas");
-			programa2();
-			break;
-		case 3:
-			Serial.println("Programa 3: recorrido poligono");
-			for (char lados = 3; lados <= 5; lados++) {
-				recorridoPoligono(lados);
-				reset();
-			}
-			break;
-		case 4:
-			Serial.println("Programa 4: agarra, gira y suelta");
+			Serial.println("Agarra, gira y suelta");
 			agarraGiraYSuelta();
 			break;
 		default:
@@ -329,6 +340,7 @@ void loop() {
 		Serial.println("RESET");
 		reset();
 	}
+fin:
 	Serial.println("FIN DEMO");
 	for(;;)
 		_loop();
@@ -343,6 +355,7 @@ void _delay(float seconds) {
 void _loop() {
 	Encoder_1.loop();
 	Encoder_2.loop();
+	Encoder_3.loop();
 	gyro_1.update();
 }
 
