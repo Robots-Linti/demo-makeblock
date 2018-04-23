@@ -179,7 +179,7 @@ void subirBrazo()
 void bajarBrazo()
 {
 	Encoder_3.setTarPWM(100);
-	_delay(4);
+	_delay(3);
 	Encoder_3.setTarPWM(0);
 }
 
@@ -233,8 +233,10 @@ int leerOpcion() {
 }
 
 void robotQueSeParaCuandoTieneAlgoAdelante() {
-	_delay(1);
+	subirBrazo();
+	bajarBrazo();
 
+	_delay(1);
 	setSpeed(normalSpeed);
 
 	while(!((ultrasonic_7.distanceCm()) < (umbral))) {
@@ -320,8 +322,6 @@ void reset()
 /* FIN FUNCIONES NUESTRAS */
 
 void loop() {
-	agarraGiraYSuelta();
-	goto fin;
 
 	/* PROGRAMA NUESTRO */
 	for (char i = 1; i <= 4; i++) {
@@ -329,10 +329,20 @@ void loop() {
 		case 1:
 			Serial.println("Robot que se para cuando tiene algo adelante");
 			robotQueSeParaCuandoTieneAlgoAdelante();
+			girar(0.69, 255);
 			break;
 		case 2:
 			Serial.println("Agarra, gira y suelta");
 			agarraGiraYSuelta();
+			break;
+		case 3:
+			Serial.println("Sube y baja por rampa hasta cima");
+			break;
+		case 4:
+			Serial.println("Avanza hasta obstáculo y se esconde detrás de el");
+			break;
+		case 5:
+			Serial.println("Gira alrededor de objeto");
 			break;
 		default:
 			break;
