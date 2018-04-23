@@ -190,6 +190,7 @@ void girar(double tiempo, double sentido)
 	_delay(tiempo);
 	Encoder_1.runSpeed(0);
 	Encoder_2.runSpeed(0);
+	_delay(1);
 }
 
 int selector() {
@@ -307,6 +308,27 @@ void agarraGiraYSuelta() {
 	}
 }
 
+void subeBajaRampa(void)
+{
+	const int normalSpeed = 255;
+	const int umbralInclinado = -15;
+	const int umbralHorizontal = -5;
+	setSpeed(normalSpeed);
+	while (gyro_1.getAngle(1) > umbralInclinado)
+		_loop();
+	while (gyro_1.getAngle(1) < umbralHorizontal)
+		_loop();
+
+	setSpeed(0);
+	_delay(2);
+	setSpeed(-normalSpeed);
+	while (gyro_1.getAngle(1) > umbralInclinado)
+		_loop();
+	while (gyro_1.getAngle(1) < umbralHorizontal)
+		_loop();
+	setSpeed(0);
+}
+
 /* 
  * Detiene todos los motores y realiza acciones útiles para el tiempo
  * entre distintos programas.
@@ -337,6 +359,9 @@ void loop() {
 			break;
 		case 3:
 			Serial.println("Sube y baja por rampa hasta cima");
+			girar(0.69, 255);
+			girar(0.69, 255);
+			subeBajaRampa();
 			break;
 		case 4:
 			Serial.println("Avanza hasta obstáculo y se esconde detrás de el");
