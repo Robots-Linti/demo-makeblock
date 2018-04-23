@@ -129,8 +129,8 @@ void setSpeed(double speed)
 
 void rotateLeft(double degrees)
 {
-	double endValue = (fmod(((gyro_1.getAngle(3)) + (180)) + (degrees),360)) - (180);
-	setRotationSpeed(turningSpeed);
+	double endValue = (fmod(((gyro_1.getAngle(3)) + (180)) + (0.8333 * degrees),360)) - (180);
+	setRotationSpeed(100);
 	if((gyro_1.getAngle(3)) > (endValue)) {
 		while(!(( 0 ) > (gyro_1.getAngle(3))))
 		{
@@ -151,6 +151,7 @@ void avanzar(int tiempo, double rapidez)
 	_delay(tiempo);
 	Encoder_1.runSpeed(0);
 	Encoder_2.runSpeed(0);
+	_delay(1);
 }
 
 void abrirPinza()
@@ -234,19 +235,18 @@ int leerOpcion() {
 }
 
 void robotQueSeParaCuandoTieneAlgoAdelante() {
+	const int umbral = 50;
 	subirBrazo();
 	bajarBrazo();
 
 	_delay(1);
 	setSpeed(normalSpeed);
 
-	while(!((ultrasonic_7.distanceCm()) < (umbral))) {
+	while (ultrasonic_7.distanceCm() > umbral)
 		_loop();
-	}
+
 	setSpeed(0);
-	while(!((ultrasonic_7.distanceCm()) > (umbral))) {
-		_loop();
-	}
+	_delay(1);
 }
 
 /*
@@ -295,17 +295,20 @@ void agarraGiraYSuelta() {
 		Encoder_3.setTarPWM(0);
 	}
 
-	for (char i = 0; i < 2; i++) {
 		avanzar(2, normalSpeed);
 		bajarBrazo();
-		if (i % 2)
-			abrirPinza();
-		else
-			cerrarPinza();
+		cerrarPinza();
 		subirBrazo();
 		avanzar(2,-normalSpeed);
-		girar(0.69, turningSpeed);
-	}
+
+		rotateLeft(180);
+
+		avanzar(2, normalSpeed);
+		bajarBrazo();
+		abrirPinza();
+		subirBrazo();
+		avanzar(2,-normalSpeed);
+
 }
 
 void subeBajaRampa(void)
@@ -351,7 +354,7 @@ void loop() {
 		case 1:
 			Serial.println("Robot que se para cuando tiene algo adelante");
 			robotQueSeParaCuandoTieneAlgoAdelante();
-			girar(0.69, 255);
+			rotateLeft(90);
 			break;
 		case 2:
 			Serial.println("Agarra, gira y suelta");
@@ -359,8 +362,7 @@ void loop() {
 			break;
 		case 3:
 			Serial.println("Sube y baja por rampa hasta cima");
-			girar(0.69, 255);
-			girar(0.69, 255);
+			rotateLeft(270);
 			subeBajaRampa();
 			break;
 		case 4:
@@ -421,5 +423,6 @@ void setup() {
 	turningSpeed = 255;      // turningSpeed = 100;
 	normalSpeed = 255;
 	umbral = 25;
+
 	/* FIN INICIALIZACIÓN VARIABLES NUESTRAS */
 }
